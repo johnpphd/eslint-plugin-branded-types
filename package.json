@@ -1,0 +1,46 @@
+{
+  "name": "eslint-plugin-branded-types",
+  "version": "0.1.0",
+  "description": "ESLint rules enforcing branded type safety -- ban casts, direct construction, and mutation of Zod branded types",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "typescript",
+    "zod",
+    "branded-types",
+    "type-safety"
+  ],
+  "license": "MIT",
+  "author": "John Pearson",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpearson-dev/eslint-plugin-branded-types"
+  },
+  "devDependencies": {
+    "@types/eslint": "^9.6.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
