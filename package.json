@@ -29,7 +29,7 @@
   "author": "John Pearson",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jpearson-dev/eslint-plugin-branded-types"
+    "url": "https://github.com/johnpphd/eslint-plugin-branded-types"
   },
   "devDependencies": {
     "@types/eslint": "^9.6.0",
