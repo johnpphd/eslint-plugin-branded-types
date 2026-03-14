@@ -1,11 +1,13 @@
 # eslint-plugin-branded-types
 
-ESLint rules enforcing branded type safety -- ban casts, direct construction, and mutation of Zod branded types.
+ESLint rules enforcing branded type safety. Bans casts, direct construction, and mutation of Zod branded types.
 
 ## Install
 
+This plugin is not published to npm. Install directly from GitHub:
+
 ```bash
-npm install -D eslint-plugin-branded-types
+npm install -D johnpphd/eslint-plugin-branded-types
 ```
 
 ## Setup
@@ -50,7 +52,7 @@ const result = EmailSchema.safeParse(rawInput);
 
 ### `branded-types/no-branded-value-mutation`
 
-Disallows mutation of branded values -- index assignment, mutating method calls (`.push()`, `.splice()`, etc.), `Object.assign()`, and `delete`.
+Disallows mutation of branded values: index assignment, mutating method calls (`.push()`, `.splice()`, etc.), `Object.assign()`, and `delete`.
 
 ```ts
 // Bad
@@ -67,7 +69,7 @@ const newList = ListSchema.parse([...brandedList, item]);
 
 Detection is based on naming conventions: a type is considered "branded" if its name contains the substring "brand" (case-insensitive). This means types like `BrandedEmail`, `UserIdBrand`, or `EmailBranded` are all detected.
 
-No type-checker integration is required -- the plugin uses only AST analysis, making it fast and compatible with any ESLint setup.
+No type-checker integration is required. The plugin uses only AST analysis, making it fast and compatible with any ESLint setup.
 
 ## Test file exemption
 

@@ -20,7 +20,7 @@ const rule: Rule.RuleModule = {
     schema: [],
   },
   create(context) {
-    const filename = context.filename ?? context.getFilename();
+    const filename = context.filename;
     if (TEST_FILE_PATTERN.test(filename)) {
       return {};
     }
