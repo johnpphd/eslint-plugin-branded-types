@@ -4,10 +4,8 @@ ESLint rules enforcing branded type safety. Bans casts, direct construction, and
 
 ## Install
 
-This plugin is not published to npm. Install directly from GitHub:
-
 ```bash
-npm install -D johnpphd/eslint-plugin-branded-types
+npm install -D eslint-plugin-branded-types
 ```
 
 ## Setup
