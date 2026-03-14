@@ -13,6 +13,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "prettier": "prettier --check \"src/**/*.ts\" \"*.md\" \"*.json\"",
+    "prettier:fix": "prettier --write \"src/**/*.ts\" \"*.md\" \"*.json\"",
     "build": "tsc",
     "prepublishOnly": "tsc"
   },
@@ -32,8 +35,12 @@
     "url": "https://github.com/johnpphd/eslint-plugin-branded-types"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/eslint": "^9.6.0",
-    "typescript": "^5.7.0"
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.57.0"
   },
   "peerDependencies": {
     "eslint": ">=9.0.0"

@@ -26,7 +26,6 @@ const rule: Rule.RuleModule = {
     }
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       VariableDeclarator(node: Rule.Node) {
         const decl = node as unknown as Record<string, unknown>;
         const id = decl.id as
