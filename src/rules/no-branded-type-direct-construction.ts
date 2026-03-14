@@ -20,13 +20,12 @@ const rule: Rule.RuleModule = {
     schema: [],
   },
   create(context) {
-    const filename = context.filename ?? context.getFilename();
+    const filename = context.filename;
     if (TEST_FILE_PATTERN.test(filename)) {
       return {};
     }
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       VariableDeclarator(node: Rule.Node) {
         const decl = node as unknown as Record<string, unknown>;
         const id = decl.id as
