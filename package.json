@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-branded-types",
   "version": "0.1.0",
-  "description": "ESLint rules enforcing branded type safety -- ban casts, direct construction, and mutation of Zod branded types",
+  "description": "ESLint rules enforcing branded type safety: ban casts, direct construction, and mutation of Zod branded types",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,8 +14,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "prettier": "prettier --check \"src/**/*.ts\" \"*.md\" \"*.json\"",
-    "prettier:fix": "prettier --write \"src/**/*.ts\" \"*.md\" \"*.json\"",
+    "prettier": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"*.md\" \"*.json\"",
+    "prettier:fix": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"*.md\" \"*.json\"",
+    "test": "vitest run",
     "build": "tsc",
     "prepare": "tsc",
     "prepublishOnly": "tsc"
@@ -35,13 +36,20 @@
     "type": "git",
     "url": "https://github.com/johnpphd/eslint-plugin-branded-types"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/eslint": "^9.6.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "@typescript-eslint/rule-tester": "^8.58.0",
+    "@typescript-eslint/typescript-estree": "^8.58.0",
+    "@typescript-eslint/utils": "^8.58.0",
     "eslint": "^10.0.3",
     "prettier": "^3.8.1",
     "typescript": "^5.7.0",
-    "typescript-eslint": "^8.57.0"
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "eslint": ">=9.0.0"

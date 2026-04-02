@@ -1,96 +1,121 @@
-import type { Rule } from "eslint";
+import { ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
+import {
+  createIsBrandedType,
+  extractTypeName,
+  isSchemaParseCall,
+} from "../utils.js";
 
-function isBrandedTypeName(name: string): boolean {
-  return name.toLowerCase().includes("brand");
-}
+const createRule = ESLintUtils.RuleCreator.withoutDocs;
 
-const TEST_FILE_PATTERN = /\.(test|spec)\.(ts|tsx|js|jsx)$/;
-
-const rule: Rule.RuleModule = {
+export default createRule({
   meta: {
     type: "problem",
     docs: {
       description:
-        "Disallow direct construction of branded types without `.parse()` or `.safeParse()`",
+        "Disallow direct construction of branded types without `.parse()`",
     },
     messages: {
       noBrandedTypeDirectConstruction:
-        "Do not directly annotate `{{ varName }}` as `{{ typeName }}`. Let the type be inferred from `Schema.parse()` or `Schema.safeParse()` instead.",
+        "Do not directly annotate `{{ varName }}` as `{{ typeName }}`. Let the type be inferred from `Schema.parse()` instead.",
     },
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
-    const filename = context.filename;
-    if (TEST_FILE_PATTERN.test(filename)) {
-      return {};
+    const checker = createIsBrandedType(context);
+
+    function isBranded(typeNode: TSESTree.TypeNode): string | null {
+      const name = extractTypeName(typeNode);
+      if (!name) return null;
+      if (checker.byNode(typeNode) || checker.byName(name)) return name;
+      return null;
     }
 
     return {
-      VariableDeclarator(node: Rule.Node) {
-        const decl = node as unknown as Record<string, unknown>;
-        const id = decl.id as
-          | {
-              type: string;
-              name?: string;
-              typeAnnotation?: {
-                typeAnnotation?: {
-                  type: string;
-                  typeName?: { type: string; name: string };
-                };
-              };
-            }
-          | undefined;
+      VariableDeclarator(node) {
+        if (node.id.type !== "Identifier" || !node.id.typeAnnotation) return;
 
-        if (!id || id.type !== "Identifier" || !id.typeAnnotation) {
-          return;
-        }
+        const typeNode = node.id.typeAnnotation.typeAnnotation;
+        const typeName = isBranded(typeNode);
+        if (!typeName) return;
 
-        const typeRef = id.typeAnnotation.typeAnnotation;
-        if (
-          !typeRef ||
-          typeRef.type !== "TSTypeReference" ||
-          !typeRef.typeName ||
-          typeRef.typeName.type !== "Identifier" ||
-          !isBrandedTypeName(typeRef.typeName.name)
-        ) {
-          return;
-        }
-
-        const init = decl.init as
-          | {
-              type: string;
-              callee?: {
-                type: string;
-                property?: { type: string; name: string };
-              };
-            }
-          | null
-          | undefined;
-
-        if (
-          init &&
-          init.type === "CallExpression" &&
-          init.callee &&
-          init.callee.type === "MemberExpression" &&
-          init.callee.property &&
-          init.callee.property.type === "Identifier" &&
-          (init.callee.property.name === "parse" ||
-            init.callee.property.name === "safeParse")
-        ) {
-          return;
-        }
+        // Allow Schema.parse() calls (but not JSON.parse, etc.)
+        if (isSchemaParseCall(node.init)) return;
 
         context.report({
           node,
           messageId: "noBrandedTypeDirectConstruction",
           data: {
-            varName: id.name ?? "unknown",
-            typeName: typeRef.typeName.name,
+            varName: node.id.name,
+            typeName,
+          },
+        });
+      },
+
+      // Function parameters with branded type annotations
+      "FunctionDeclaration, FunctionExpression, ArrowFunctionExpression"(
+        node:
+          | TSESTree.FunctionDeclaration
+          | TSESTree.FunctionExpression
+          | TSESTree.ArrowFunctionExpression
+      ) {
+        for (const param of node.params) {
+          // Handle plain identifier params and assignment pattern defaults
+          let ident: TSESTree.Identifier | null = null;
+          let defaultValue: TSESTree.Expression | null = null;
+
+          if (param.type === "Identifier") {
+            ident = param;
+          } else if (
+            param.type === "AssignmentPattern" &&
+            param.left.type === "Identifier"
+          ) {
+            ident = param.left;
+            defaultValue = param.right;
+          }
+
+          if (!ident || !ident.typeAnnotation) continue;
+          const typeNode = ident.typeAnnotation.typeAnnotation;
+          const typeName = isBranded(typeNode);
+          if (!typeName) continue;
+
+          // Allow if default value is a Schema.parse() call
+          if (isSchemaParseCall(defaultValue)) continue;
+
+          context.report({
+            node: param,
+            messageId: "noBrandedTypeDirectConstruction",
+            data: {
+              varName: ident.name,
+              typeName,
+            },
+          });
+        }
+      },
+
+      // Class properties with branded type annotations
+      PropertyDefinition(node) {
+        if (!node.typeAnnotation || node.key.type !== "Identifier") {
+          return;
+        }
+
+        const typeNode = node.typeAnnotation.typeAnnotation;
+        const typeName = isBranded(typeNode);
+        if (!typeName) return;
+
+        // Allow if initialized with Schema.parse()
+        if (isSchemaParseCall(node.value)) return;
+
+        context.report({
+          node,
+          messageId: "noBrandedTypeDirectConstruction",
+          data: {
+            varName: node.key.name,
+            typeName,
           },
         });
       },
     };
   },
-};
-
-export default rule;
+});
