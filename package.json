@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-branded-types",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ESLint rules enforcing branded type safety: ban casts, direct construction, and mutation of Zod branded types",
   "type": "module",
   "main": "./dist/index.js",
