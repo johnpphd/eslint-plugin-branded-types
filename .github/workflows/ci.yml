@@ -1,4 +1,4 @@
-name: "CI: Lint, Typecheck, Build"
+name: "CI: Lint, Typecheck, Test, Build"
 on:
   push:
     branches: [main]
@@ -8,13 +8,19 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 22, 24]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
-      - run: npm install
-      - run: npx prettier --check "src/**/*.ts" "*.md" "*.json"
-      - run: npx eslint .
-      - run: npm run typecheck
-      - run: npm run build
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prettier
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build

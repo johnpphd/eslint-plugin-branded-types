@@ -1,58 +1,58 @@
-import type { Rule } from "eslint";
+import { ESLintUtils } from "@typescript-eslint/utils";
+import type { TSESTree } from "@typescript-eslint/utils";
+import { createIsBrandedType, extractTypeName } from "../utils.js";
 
-function isBrandedTypeName(name: string): boolean {
-  return name.toLowerCase().includes("brand");
-}
+const createRule = ESLintUtils.RuleCreator.withoutDocs;
 
-const TEST_FILE_PATTERN = /\.(test|spec)\.[jt]sx?$/;
-
-const rule: Rule.RuleModule = {
+export default createRule({
   meta: {
     type: "problem",
     docs: {
       description:
-        "Disallow `as` type assertions targeting branded types -- use Schema.parse() or Schema.safeParse() instead",
+        "Disallow type assertions targeting branded types. Use Schema.parse() instead.",
     },
     messages: {
       noBrandedTypeCast:
-        "Avoid `as {{ typeName }}` -- branded types must be constructed via `Schema.parse()` or `Schema.safeParse()`, not type assertions.",
+        "Avoid `as {{ typeName }}`. Branded types must be constructed via `Schema.parse()`, not type assertions.",
     },
     schema: [],
   },
+  defaultOptions: [],
   create(context) {
-    const filename = context.filename;
-    if (TEST_FILE_PATTERN.test(filename)) {
-      return {};
-    }
+    const checker = createIsBrandedType(context);
 
-    return {
-      TSAsExpression(
-        node: Rule.Node & {
-          typeAnnotation?: {
-            type: string;
-            typeName?: { type: string; name: string };
-          };
-        }
-      ) {
-        const typeAnnotation = node.typeAnnotation;
-        if (
-          typeAnnotation &&
-          typeAnnotation.type === "TSTypeReference" &&
-          typeAnnotation.typeName &&
-          typeAnnotation.typeName.type === "Identifier" &&
-          isBrandedTypeName(typeAnnotation.typeName.name)
-        ) {
+    function checkAssertion(
+      node:
+        | TSESTree.TSAsExpression
+        | TSESTree.TSTypeAssertion
+        | TSESTree.TSSatisfiesExpression
+    ) {
+      const typeName = extractTypeName(node.typeAnnotation);
+      if (!typeName) {
+        // Not a type reference or unrecognized shape; try structural only
+        if (checker.byNode(node.typeAnnotation)) {
           context.report({
             node,
             messageId: "noBrandedTypeCast",
-            data: {
-              typeName: typeAnnotation.typeName.name,
-            },
+            data: { typeName: "branded type" },
           });
         }
-      },
+        return;
+      }
+
+      if (checker.byNode(node.typeAnnotation) || checker.byName(typeName)) {
+        context.report({
+          node,
+          messageId: "noBrandedTypeCast",
+          data: { typeName },
+        });
+      }
+    }
+
+    return {
+      TSAsExpression: checkAssertion,
+      TSTypeAssertion: checkAssertion,
+      TSSatisfiesExpression: checkAssertion,
     };
   },
-};
-
-export default rule;
+});

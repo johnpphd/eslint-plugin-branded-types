@@ -9,7 +9,7 @@ const rules = {
   "no-branded-value-mutation": noBrandedValueMutation,
 };
 
-const recommendedRules: Linter.RulesRecord = {
+const allRules: Linter.RulesRecord = {
   "branded-types/no-branded-type-cast": "error",
   "branded-types/no-branded-type-direct-construction": "error",
   "branded-types/no-branded-value-mutation": "error",
@@ -18,7 +18,9 @@ const recommendedRules: Linter.RulesRecord = {
 const plugin: ESLint.Plugin & {
   configs: Record<string, Linter.Config>;
 } = {
-  rules,
+  // Cast needed: @typescript-eslint RuleModule is structurally compatible
+  // with ESLint's Plugin.rules but the types don't align exactly.
+  rules: rules as unknown as ESLint.Plugin["rules"],
   configs: {
     recommended: {
       plugins: {
@@ -26,7 +28,8 @@ const plugin: ESLint.Plugin & {
           return plugin;
         },
       },
-      rules: recommendedRules,
+      rules: allRules,
+      ignores: ["**/*.test.*", "**/*.spec.*"],
     },
     all: {
       plugins: {
@@ -34,7 +37,7 @@ const plugin: ESLint.Plugin & {
           return plugin;
         },
       },
-      rules: recommendedRules,
+      rules: allRules,
     },
   },
 };
