@@ -2,17 +2,20 @@ import type { ESLint, Linter } from "eslint";
 import noBrandedTypeCast from "./rules/no-branded-type-cast.js";
 import noBrandedTypeDirectConstruction from "./rules/no-branded-type-direct-construction.js";
 import noBrandedValueMutation from "./rules/no-branded-value-mutation.js";
+import suggestBrandCandidates from "./rules/suggest-brand-candidates.js";
 
 const rules = {
   "no-branded-type-cast": noBrandedTypeCast,
   "no-branded-type-direct-construction": noBrandedTypeDirectConstruction,
   "no-branded-value-mutation": noBrandedValueMutation,
+  "suggest-brand-candidates": suggestBrandCandidates,
 };
 
 const allRules: Linter.RulesRecord = {
   "branded-types/no-branded-type-cast": "error",
   "branded-types/no-branded-type-direct-construction": "error",
   "branded-types/no-branded-value-mutation": "error",
+  "branded-types/suggest-brand-candidates": "warn",
 };
 
 const plugin: ESLint.Plugin & {
